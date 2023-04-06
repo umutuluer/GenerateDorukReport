@@ -27,18 +27,20 @@ namespace GenerateDorukReport
                 if (!reasons.Contains(stopover.Reason))
                     reasons.Add(stopover.Reason);
 
-                var matchedOrders = orders.Where(o => stopover.Start >= o.Start && stopover.Start <= o.End)
-                    //.Where(m => stopover.End >= m.Start && stopover.End <= m.End)
-                    .ToArray();
+                var matchedOrders = orders.Where(o => stopover.Start < o.End && o.Start < stopover.End).ToArray();
 
                 foreach (var m in matchedOrders)
                 {
-                    var calcEndDate = stopover.End;
+                    var defaultEndDate = stopover.End;
+                    var defaultStartDate = stopover.Start;
+
+                    if (m.Start > stopover.Start)
+                        defaultStartDate = m.Start;
 
                     if (m.End < stopover.End)
-                        calcEndDate = m.End;
+                        defaultEndDate = m.End;
 
-                    var totalStopoverMinutes = (int)calcEndDate.Subtract(stopover.Start).TotalMinutes;
+                    var totalStopoverMinutes = (int)defaultEndDate.Subtract(defaultStartDate).TotalMinutes;
 
                     if (reportItems.ContainsKey(m.Id))
                     {
